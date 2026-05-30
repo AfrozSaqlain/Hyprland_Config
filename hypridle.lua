@@ -4,93 +4,85 @@
 
 ---@module 'hl'
 
--- /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
+-- /* ---- 💫 https://github.com/JaKooLit 💫 ---- */ #
 
--- Hypridle 
-
--- Original config submitted by https://github.com/SherLock707                                                       
+-- Hypridle
+-- Original config submitted by https://github.com/SherLock707
 
 local HOME = os.getenv("HOME")
+
+-- FIX: iDIR was defined here but then re-constructed inline everywhere below.
+-- It is now used consistently via this variable.
 local iDIR = HOME .. "/.config/swaync/images/ja.png"
 
 hl.config({
     general = {
         lock_cmd = "pidof hyprlock || hyprlock",
-        -- runs hyprlock if it is not already running (this is always run when "loginctl lock-session" is called) 
-        -- unlock_cmd = killall hyprlock # kills hyprlock when unlocking (this is always run when "loginctl unlock-session" is called)
+        -- runs hyprlock if it is not already running (this is always run when "loginctl lock-session" is called)
+
+        -- unlock_cmd = "killall hyprlock", -- kills hyprlock when unlocking (this is always run when "loginctl unlock-session" is called)
+
         before_sleep_cmd = "loginctl lock-session",
         -- ensures that the session is locked before going to sleep
+
         after_sleep_cmd = "hyprctl dispatch dpms on",
-        -- turn of screen after sleep (not strictly necessary, but just in case)
+        -- turn on screen after sleep (not strictly necessary, but just in case)
+
         ignore_dbus_inhibit = false,
         -- whether to ignore dbus-sent idle-inhibit requests (used by e.g. firefox or steam)
     },
 })
 
 -- turn off screen faster if session is already locked
-
 -- (disabled by default)
+-- hl.config({
+--     listener = {
+--         timeout = 30,
+--         ["on-timeout"] = "pidof hyprlock && hyprctl dispatch dpms off",
+--         ["on-resume"]  = "pidof hyprlock && hyprctl dispatch dpms on",
+--     },
+-- })
 
--- listener {
+-- FIX: Each listener block is a separate hl.config() call. Whether calling
+-- hl.config() multiple times with 'listener' is additive or overwrites depends
+-- on the Hyprland runtime. If only the second listener fires, merge both into
+-- a single call or check if hl.listener() is the correct API for multiple listeners.
+-- As written below, each call is intentional and mirrors the original .conf blocks.
 
---     timeout = 30                            # 30 seconds
-
---     on-timeout = pidof hyprlock && hyprctl dispatch dpms off # turns off the screen if hyprlock is active
-
---     on-resume = pidof hyprlock && hyprctl dispatch dpms on    # command to run when activity is detected after timeout has fired.
-
--- }
-
--- Warn
-
+-- Warn: notify after 9 minutes of idle
 hl.config({
     listener = {
         timeout = 540,
         -- 9 min
-        ["on-timeout"] = "notify-send -i " .. HOME .. "/.config/swaync/images/ja.png  You are idle!",
-        -- command to run when timeout has passed
-        ["on-resume"] = "notify-send -i " .. HOME .. "/.config/swaync/images/ja.png  Oh! you're Back  Hello !!!",
-        -- command to run when activity is detected after timeout has fired.
+        ["on-timeout"] = "notify-send -i " .. iDIR .. " 'You are idle!'",
+        ["on-resume"]  = "notify-send -i " .. iDIR .. " 'Oh! you are Back Hello !!!'",
     },
 })
--- NOTE: Section 'listener' may be a plugin or custom section; verify the output
 
--- Screenlock
-
+-- Screenlock: lock session after 10 minutes of idle
 hl.config({
     listener = {
         timeout = 600,
         -- 10 min
         ["on-timeout"] = "loginctl lock-session",
-        -- command to run when timeout has passed
-        --on-resume = notify-send -i $iDIR " System Unlocked!"  # command to run when activity is detected after timeout has fired.
+        -- on-resume = notify-send -i $iDIR " System Unlocked!"
     },
 })
 
--- NOTE: Section 'listener' may be a plugin or custom section; verify the output
+-- Turn off screen (disabled by default)
+-- hl.config({
+--     listener = {
+--         timeout = 630,  -- 10.5 min
+--         ["on-timeout"] = "hyprctl dispatch dpms off",
+--         ["on-resume"]  = "hyprctl dispatch dpms on",
+--     },
+-- })
 
--- Turn off screen 
-
--- (disabled by default)
-
--- listener {
-
---     timeout = 630                            # 10.5 min
-
---     on-timeout = hyprctl dispatch dpms off  # command to run when timeout has passed
-
---     on-resume = hyprctl dispatch dpms on    # command to run when activity is detected after timeout has fired.
-
--- }
-
--- Suspend # disabled by default
-
--- listener {
-
--- timeout = 1200                            # 20 min
-
--- on-timeout = systemctl suspend # command to run when timeout has passed
-
--- on-resume = notify-send -i $iDIR " Oh! you're back" "Hello !!!"  # command to run when activity is detected after timeout has fired.
-
--- }
+-- Suspend (disabled by default)
+-- hl.config({
+--     listener = {
+--         timeout = 1200,  -- 20 min
+--         ["on-timeout"] = "systemctl suspend",
+--         ["on-resume"]  = "notify-send -i " .. iDIR .. " 'Oh! you are back' 'Hello !!!'",
+--     },
+-- })
