@@ -4,87 +4,49 @@
 
 ---@module 'hl'
 
--- /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  #
+-- /* ---- 💫 https://github.com/JaKooLit 💫 ---- */ #
 
 -- always refer to Hyprland wiki
-
 -- https://wiki.hyprland.org/
 
 -- Initial boot script enable to apply initial wallpapers, theming, new settings etc.
-
 -- suggest not to change this or delete this including deleting referrence file in ~/.config/hypr/.initial_startup_done
-
 -- as long as the referrence file is present, this initial-boot.sh will not execute
 
+-- NOTE: All require() paths are relative to this file's location (~/.config/hypr/).
+-- Each of these files must exist as a .lua file (not .conf) for require() to work.
 
 -- Sourcing external config files
+
 local HOME = os.getenv("HOME")
-local configs = HOME .. "/.config/hypr/configs"
 
--- Default Configs directory path
+-- Default Configs directory path: ~/.config/hypr/configs/
+require("configs/Keybinds")               -- Pre-configured keybinds
 
-local Keybinds = require("configs/Keybinds")
+-- ## This is where you want to start tinkering
 
-
--- Pre-configured keybinds
-
--- ## This is where you want to start tinkering 
-
-local UserConfigs = HOME .. "/.config/hypr/UserConfigs"
-
--- User Configs directory path
-
-local Startup_Apps = require("UserConfigs/Startup_Apps")
-
--- put your start-up packages on this file
-
-local ENVariables = require("UserConfigs/ENVariables")
-
--- Environment variables to load
+-- User Configs directory path: ~/.config/hypr/UserConfigs/
+require("UserConfigs/Startup_Apps")       -- put your start-up packages on this file
+require("UserConfigs/ENVariables")        -- Environment variables to load
 
 --source= $UserConfigs/Monitors.conf # Its all about your monitor config (old dots) will remove on push to main
-
 --source= $UserConfigs/WorkspaceRules.conf # Hyprland workspaces (old dots) will remove on push to main
 
-local Laptops = require("UserConfigs/Laptops")
-
--- For laptop related
-
-local LaptopDisplay = require("UserConfigs/LaptopDisplay")
-
--- Laptop display related. You need to read the comment on this file
-
-local WindowRules = require("UserConfigs/WindowRules")
-
--- all about Hyprland Window Rules and Layer Rules
-
-local UserDecorations = require("UserConfigs/UserDecorations")
-
--- Decorations config file
-
-local UserAnimations = require("UserConfigs/UserAnimations")
-
--- Animation config file
-
-local UserKeybinds = require("UserConfigs/UserKeybinds")
-
--- Put your own keybinds here
-
-local UserSettings = require("UserConfigs/UserSettings")
-
--- Main Hyprland Settings.
-
-local user_defaults = require("UserConfigs/01-UserDefaults")
-
--- settings for User defaults apps
+require("UserConfigs/Laptops")            -- For laptop related
+require("UserConfigs/LaptopDisplay")      -- Laptop display related. You need to read the comment on this file
+require("UserConfigs/WindowRules")        -- all about Hyprland Window Rules and Layer Rules
+require("UserConfigs/UserDecorations")    -- Decorations config file
+require("UserConfigs/UserAnimations")     -- Animation config file
+require("UserConfigs/UserKeybinds")       -- Put your own keybinds here
+require("UserConfigs/UserSettings")       -- Main Hyprland Settings.
+require("UserConfigs/01-UserDefaults")    -- settings for User defaults apps
 
 -- nwg-displays
-
-local monitors = require("monitors")
-
-local workspaces = require("workspaces")
+require("monitors")
+require("workspaces")
 
 -- Autostart
+-- FIX: was hl.exec_cmd() which does not exist. The correct API is hl.dsp.exec_cmd().
 hl.on("hyprland.start", function()
-    hl.exec_cmd(HOME .. "/.config/hypr/initial-boot.sh")
+    hl.dsp.exec_cmd(HOME .. "/.config/hypr/initial-boot.sh")
 end)
